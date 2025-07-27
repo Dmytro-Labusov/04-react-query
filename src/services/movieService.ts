@@ -1,5 +1,5 @@
 import axios from "axios";
-import type { MovieResponse } from "../types/movie";
+import type { Movie } from "../types/movie";
 
 const BASE_URL = "https://api.themoviedb.org/3";
 const TOKEN = import.meta.env.VITE_TMDB_TOKEN;
@@ -13,4 +13,11 @@ export async function fetchMovies(
     headers: { Authorization: `Bearer ${TOKEN}` },
   });
   return response.data;
+}
+
+export interface MovieResponse {
+  page: number;
+  results: Movie[];
+  total_pages: number;
+  total_results: number;
 }

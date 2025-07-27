@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchMovies } from "../../services/movieService";
-import type { Movie, MovieResponse } from "../../types/movie";
+import type { Movie } from "../../types/movie";
+import type { MovieResponse } from "../../services/movieService";
 import SearchBar from "../SearchBar/SearchBar";
 import MovieGrid from "../MovieGrid/MovieGrid";
 import Loader from "../Loader/Loader";
@@ -19,19 +20,32 @@ export default function App() {
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<Movie | null>(null);
 
-  const { data, isLoading, isError } = useQuery<MovieResponse, Error>({
+  const { data, isLoading, isError, isSuccess } = useQuery<
+    MovieResponse,
+    Error
+  >({
     queryKey: ["movies", query, page],
     queryFn: () => fetchMovies(query, page),
     enabled: Boolean(query.trim()),
     staleTime: 5000,
+    placeholderData: (previousData) => previousData,
   });
 
-  const handleSearch = (q: string) => {
-    if (!q.trim()) {
+  useEffect(() => {
+    if (isSuccess && data?.results?.length === 0) {
+      toast(t("noMovies"));
+    }
+  }, [isSuccess, data, t]);
+
+  const handleSearch = (query: string) => {
+    const trimmedQuery = query.trim();
+
+    if (!trimmedQuery) {
       toast.error(t("noQuery"));
       return;
     }
-    setQuery(q);
+
+    setQuery(trimmedQuery);
     setPage(1);
     setSelected(null);
   };
@@ -49,9 +63,9 @@ export default function App() {
     <div className={css.app}>
       <Toaster position="top-right" />
       <LanguageSwitcher />
-      <SearchBar onSubmit={handleSearch} />
+      <SearchBar action={handleSearch} />
       {isLoading && <Loader />}
-      {data?.results && data.results.length > 0 && !isLoading && (
+      {isSuccess && data?.results && data.results.length > 0 && (
         <>
           <ReactPaginate
             pageCount={data.total_pages}
@@ -67,10 +81,9 @@ export default function App() {
             nextLabel="→"
             previousLabel="←"
           />
-          <MovieGrid movies={data!.results} onSelect={setSelected} />
+          <MovieGrid movies={data.results} onSelect={setSelected} />
         </>
       )}
-      {data?.results?.length === 0 && !isLoading && <p>{t("noMovies")}</p>}
       {selected && (
         <MovieModal movie={selected} onClose={() => setSelected(null)} />
       )}
