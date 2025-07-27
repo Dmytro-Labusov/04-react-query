@@ -63,7 +63,7 @@ export default function App() {
     <div className={css.app}>
       <Toaster position="top-right" />
       <LanguageSwitcher />
-      <SearchBar action={handleSearch} />
+      <SearchBar onSubmit={handleSearch} />
       {isLoading && <Loader />}
       {isSuccess && data?.results && data.results.length > 0 && (
         <>

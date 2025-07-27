@@ -4,10 +4,10 @@ import css from "./SearchBar.module.css";
 import { useTranslation } from "react-i18next";
 
 interface SearchBarProps {
-  action: (query: string) => void;
+  onSubmit: (query: string) => void;
 }
 
-export default function SearchBar({ action }: SearchBarProps) {
+export default function SearchBar({ onSubmit }: SearchBarProps) {
   const { t } = useTranslation();
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
@@ -21,7 +21,7 @@ export default function SearchBar({ action }: SearchBarProps) {
       return;
     }
 
-    action(query);
+    onSubmit(query);
     form.reset();
   };
 
